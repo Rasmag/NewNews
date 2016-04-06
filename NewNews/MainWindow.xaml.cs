@@ -19,12 +19,14 @@ namespace NewNews
 	/// <summary>
 	/// Logique d'interaction pour MainWindow.xaml
 	/// </summary>
-[Export]
+	[Export]
 	public partial class MainWindow : Window
 	{
-		public MainWindow()
+		[ImportingConstructor]
+		public MainWindow(IMainWindowViewModel viewmodel)
 		{
 			InitializeComponent();
+			DataContext = viewmodel;
 		}
 	}
 }
