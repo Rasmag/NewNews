@@ -1,14 +1,24 @@
 ﻿using System;
 using System.ComponentModel.Composition;
+using System.Windows;
+using Elasticsearch.Net;
 using Nest;
 using NewNews.Infrastructure.Common;
+using Prism.Commands;
 
 namespace NewNews
 {
 	[Export(typeof(IMainWindowViewModel))]
-	public class MainWindowViewModel:IMainWindowViewModel
+	public class MainWindowViewModel : IMainWindowViewModel
 	{
 		private ElasticClient elasticClient;
+		News news = new News
+							   {
+								   Id = 2,
+								   Headline = "Titre de ma news",
+								   Content = "Voici le contenu de ma news",
+								   Coding = "WHT"
+							   };
 
 		public MainWindowViewModel()
 		{
@@ -21,19 +31,27 @@ namespace NewNews
 
 		private void LoadNews()
 		{
-			var news = new News
-			           {
-						   Id=2,
-						   Headline = "Titre de ma news",
-						   Content = "Voici le contenu de ma news",
-						   Coding = "WHT"
-			           };
-			var res = elasticClient.Index(news,f=>f.Index("my_first_index").Id(news.Id.ToString()).Refresh());
-			Console.WriteLine("NewsNewTrace --> "+res.DebugInformation);
+
+			var res = elasticClient.Index(news, f => f.Index("my_first_index").Id(news.Id.ToString()).Refresh());
+			Console.WriteLine("NewsNewTrace --> " + res.DebugInformation);
 		}
+
+		private DelegateCommand _getCommand;
+		public DelegateCommand GetCommand
+		{
+			get 
+			{
+				return _getCommand ?? (_getCommand = new DelegateCommand(() =>
+				                                                         {
+																			 var resGet = elasticClient.Search<News>(s => s.Index("my_first_index"));
+					                                                         var e = "";
+				                                                         }));
+			}
+		}
+	
 	}
 
-	internal class News
+	public class News
 	{
 		public int Id { get; set; }
 		public string Headline { get; set; }
@@ -43,6 +61,6 @@ namespace NewNews
 
 	public interface IMainWindowViewModel
 	{
-		
+
 	}
 }
